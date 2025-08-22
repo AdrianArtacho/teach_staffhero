@@ -10,7 +10,7 @@
 		}
 ,
 		"classnamespace" : "box",
-		"rect" : [ 300.0, 260.0, 1054.0, 779.0 ],
+		"rect" : [ 300.0, 87.0, 1054.0, 779.0 ],
 		"openinpresentation" : 1,
 		"gridsize" : [ 15.0, 15.0 ],
 		"boxes" : [ 			{
@@ -119,7 +119,7 @@
 					"parameter_enable" : 0,
 					"patching_rect" : [ 724.999936044216156, 512.878742635250092, 100.757566869258881, 24.999997794628143 ],
 					"presentation" : 1,
-					"presentation_rect" : [ 230.303009986877441, 138.636351406574249, 78.787871837615967, 24.999997794628143 ],
+					"presentation_rect" : [ 91.0, 86.0, 78.787871837615967, 24.999997794628143 ],
 					"text" : "57120",
 					"varname" : "textedit[1]"
 				}
@@ -155,7 +155,7 @@
 					"parameter_enable" : 0,
 					"patching_rect" : [ 578.030252039432526, 512.878742635250092, 100.757566869258881, 24.999997794628143 ],
 					"presentation" : 1,
-					"presentation_rect" : [ 146.212108314037323, 138.636351406574249, 78.787871837615967, 24.999997794628143 ],
+					"presentation_rect" : [ 7.0, 86.0, 78.787871837615967, 24.999997794628143 ],
 					"text" : "127.0.0.1",
 					"varname" : "textedit"
 				}
@@ -192,7 +192,7 @@
 					"parameter_enable" : 1,
 					"patching_rect" : [ 778.030234396457672, 98.484839797019958, 85.606053054332733, 17.42424088716507 ],
 					"presentation" : 1,
-					"presentation_rect" : [ 146.212108314037323, 113.636353611946106, 162.878773510456085, 17.42424088716507 ],
+					"presentation_rect" : [ 7.0, 61.0, 162.878773510456085, 17.42424088716507 ],
 					"saved_attribute_attributes" : 					{
 						"valueof" : 						{
 							"parameter_enum" : [ "val1", "val2" ],
@@ -254,7 +254,7 @@
 					"parameter_enable" : 1,
 					"patching_rect" : [ 207.0, 82.575750291347504, 240.0, 47.0 ],
 					"presentation" : 1,
-					"presentation_rect" : [ 146.212108314037323, 57.57575249671936, 162.878773510456085, 47.0 ],
+					"presentation_rect" : [ 7.0, 5.0, 162.878773510456085, 47.0 ],
 					"saved_attribute_attributes" : 					{
 						"valueof" : 						{
 							"parameter_longname" : "live.numbox",
@@ -638,7 +638,7 @@
 
 			}
  ],
-		"originid" : "pat-13",
+		"originid" : "pat-103",
 		"parameters" : 		{
 			"obj-26" : [ "live.numbox", "live.numbox", 0 ],
 			"obj-34" : [ "live.text", "live.text", 0 ],
