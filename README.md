@@ -20,10 +20,13 @@ Awesome—here’s a controllable, StaffWars-style visual you can drive from **P
 
 # How to run (macOS or Windows)
 
-1. Install deps (once):
+1. Install VENV and deps (once):
 
 ```bash
-python -m pip install pygame python-osc
+python3 -m venv ./.venv
+source .venv/bin/activate
+
+pip install pygame python-osc
 ```
 
 2. Start the visualizer:
