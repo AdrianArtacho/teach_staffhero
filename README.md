@@ -92,3 +92,15 @@ To schedule a note for later:
 * Want MIDI-in? Set `USE_MIDI_IN=True` (then `pip install mido python-rtmidi`) and any Note On will spawn.
 
 If you’d like a **Jitter (jit.lcd/jit.gl)** version inside Max so you can keep everything in one patcher, say the word—I can drop a working `[jsui]`/`jit.mgraphics` or `jit.gl.sketch` patch that takes the same OSC messages.
+
+---
+
+## To-Do
+
+* Clefs
+* Add second staff (piano view)
+* something needs to happen visually when the user plyed the right next note
+* NowLine displayed
+* option to hear the notes (in browser or so)
+* keep the score of the game visible
+* implement point system (negative points also)
