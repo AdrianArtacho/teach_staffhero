@@ -1,4 +1,4 @@
-# StaffGame
+# 🕹️ StaffHero
 
 Awesome—here’s a controllable, StaffWars-style visual you can drive from **Python** or **Max/MSP** via **OSC**.
 
