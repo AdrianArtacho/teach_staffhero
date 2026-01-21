@@ -1,6 +1,10 @@
-# 🕹️ StaffHero
+<img width="2704" height="972" alt="image" src="https://github.com/user-attachments/assets/1a337384-95ce-4153-839c-ac509425b8d5" /># 🕹️ StaffHero
 
 Controllable, StaffWars-style visual you can drive from **Python** or **Max/MSP** via **OSC**.
+
+![img/gui.png](img/gui.png)
+
+---
 
 # What you get
 
