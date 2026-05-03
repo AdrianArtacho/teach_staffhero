@@ -4,7 +4,7 @@ from pygame import Rect
 from pythonosc import dispatcher, osc_server
 
 # ========================
-# CLEF SYSTEM (SMuFL)
+# CLEFS (SMuFL)
 # ========================
 
 CLEF_TREBLE = "treble"
@@ -13,13 +13,12 @@ CLEF_ALTO = "alto"
 CLEF_TENOR = "tenor"
 
 CLEF_REFERENCE = {
-    CLEF_TREBLE: 64,  # E4
-    CLEF_BASS:   43,  # G2
-    CLEF_ALTO:   60,  # C4
-    CLEF_TENOR:  57,  # A3
+    CLEF_TREBLE: 64,
+    CLEF_BASS:   43,
+    CLEF_ALTO:   60,
+    CLEF_TENOR:  57,
 }
 
-# SMuFL codepoints (Bravura)
 CLEF_SYMBOLS = {
     CLEF_TREBLE: "\uE050",
     CLEF_BASS:   "\uE062",
@@ -27,20 +26,12 @@ CLEF_SYMBOLS = {
     CLEF_TENOR:  "\uE05D",
 }
 
-# Which staff line each clef anchors to
+# Correct musical anchor lines
 CLEF_ANCHOR_LINE = {
     CLEF_TREBLE: -1,  # G line
     CLEF_BASS:   +1,  # F line
-    CLEF_ALTO:    0,  # middle C line
-    CLEF_TENOR:  +1,
-}
-
-# Fine-tuning offsets (Bravura-specific)
-CLEF_Y_OFFSET = {
-    CLEF_TREBLE: -10,
-    CLEF_BASS:   -6,
-    CLEF_ALTO:   -8,
-    CLEF_TENOR:  -8,
+    CLEF_ALTO:    0,  # C line
+    CLEF_TENOR:   0,
 }
 
 # ========================
@@ -59,7 +50,6 @@ NOTE_COLOR = (20, 20, 20)
 START_SPEED = 180
 SEMITONE_TO_STAFF_STEP = 7/12
 
-
 # ========================
 # STAFF GEOMETRY
 # ========================
@@ -67,15 +57,13 @@ SEMITONE_TO_STAFF_STEP = 7/12
 def get_staff_line(index):
     return STAFF_Y_CENTER + index * LINE_SPACING
 
-
 def midi_to_staff_y(midi, clef):
     ref_midi = CLEF_REFERENCE[clef]
-    ref_y = get_staff_line(+2)  # bottom line
+    ref_y = get_staff_line(+2)
 
     semis = midi - ref_midi
     steps = semis * SEMITONE_TO_STAFF_STEP
     return ref_y - steps * (LINE_SPACING / 2.0)
-
 
 # ========================
 # NOTE
@@ -102,7 +90,6 @@ class Note:
         rect = Rect(int(self.x - self.rx), int(self.y - self.ry),
                     int(self.rx*2), int(self.ry*2))
         pygame.draw.ellipse(surf, NOTE_COLOR, rect)
-
 
 # ========================
 # SPAWNER
@@ -134,7 +121,6 @@ class Spawner:
             for n in self.notes:
                 n.draw(surf)
 
-
 # ========================
 # OSC
 # ========================
@@ -162,7 +148,6 @@ class OSCBridge(threading.Thread):
         print("OSC ready")
         server.serve_forever()
 
-
 # ========================
 # DRAW
 # ========================
@@ -174,24 +159,30 @@ def draw_staff(surf):
                          (MARGIN_LEFT, y),
                          (WIDTH - MARGIN_RIGHT, y), 2)
 
-
 def draw_clef(surf, clef, font):
     symbol = CLEF_SYMBOLS[clef]
 
     txt = font.render(symbol, True, STAFF_COLOR)
     rect = txt.get_rect()
 
-    # horizontal placement
-    x = MARGIN_LEFT - 60
+    x = MARGIN_LEFT - 55
 
-    # vertical alignment (musical)
-    anchor_line = CLEF_ANCHOR_LINE[clef]
-    anchor_y = get_staff_line(anchor_line)
+    # Musical anchor line
+    anchor_y = get_staff_line(CLEF_ANCHOR_LINE[clef])
 
-    y = anchor_y - rect.height * 0.5 + CLEF_Y_OFFSET[clef]
+    # 🎯 CRITICAL FIX: Bravura offset per clef
+    if clef == CLEF_TREBLE:
+        y = anchor_y - rect.height * 0.72
+    elif clef == CLEF_BASS:
+        y = anchor_y - rect.height * 0.60
+    elif clef == CLEF_ALTO:
+        y = anchor_y - rect.height * 0.66
+    elif clef == CLEF_TENOR:
+        y = anchor_y - rect.height * 0.66
+    else:
+        y = anchor_y - rect.height * 0.5
 
     surf.blit(txt, (x, y))
-
 
 # ========================
 # MAIN
@@ -202,8 +193,9 @@ def main():
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock()
 
-    # LOAD BRAVURA
-    font_clef = pygame.font.Font("Bravura.otf", 64)
+    # 🔥 SCALE CLEF BASED ON STAFF
+    clef_size = int(LINE_SPACING * 6.5)
+    font_clef = pygame.font.Font("Bravura.otf", clef_size)
 
     spawner = Spawner()
     OSCBridge(spawner).start()
