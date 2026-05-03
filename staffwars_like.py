@@ -4,7 +4,7 @@ from pygame import Rect
 from pythonosc import dispatcher, osc_server
 
 # ========================
-# CLEFS (SMuFL)
+# CLEF SYSTEM (SMuFL)
 # ========================
 
 CLEF_TREBLE = "treble"
@@ -13,17 +13,34 @@ CLEF_ALTO = "alto"
 CLEF_TENOR = "tenor"
 
 CLEF_REFERENCE = {
-    CLEF_TREBLE: 64,
-    CLEF_BASS:   43,
-    CLEF_ALTO:   60,
-    CLEF_TENOR:  57,
+    CLEF_TREBLE: 64,  # E4
+    CLEF_BASS:   43,  # G2
+    CLEF_ALTO:   60,  # C4
+    CLEF_TENOR:  57,  # A3
 }
 
+# SMuFL codepoints (Bravura)
 CLEF_SYMBOLS = {
     CLEF_TREBLE: "\uE050",
     CLEF_BASS:   "\uE062",
     CLEF_ALTO:   "\uE05C",
     CLEF_TENOR:  "\uE05D",
+}
+
+# Which staff line each clef anchors to
+CLEF_ANCHOR_LINE = {
+    CLEF_TREBLE: -1,  # G line
+    CLEF_BASS:   +1,  # F line
+    CLEF_ALTO:    0,  # middle C line
+    CLEF_TENOR:  +1,
+}
+
+# Fine-tuning offsets (Bravura-specific)
+CLEF_Y_OFFSET = {
+    CLEF_TREBLE: -10,
+    CLEF_BASS:   -6,
+    CLEF_ALTO:   -8,
+    CLEF_TENOR:  -8,
 }
 
 # ========================
@@ -44,12 +61,16 @@ SEMITONE_TO_STAFF_STEP = 7/12
 
 
 # ========================
-# STAFF MAPPING
+# STAFF GEOMETRY
 # ========================
+
+def get_staff_line(index):
+    return STAFF_Y_CENTER + index * LINE_SPACING
+
 
 def midi_to_staff_y(midi, clef):
     ref_midi = CLEF_REFERENCE[clef]
-    ref_y = STAFF_Y_CENTER + 2 * LINE_SPACING
+    ref_y = get_staff_line(+2)  # bottom line
 
     semis = midi - ref_midi
     steps = semis * SEMITONE_TO_STAFF_STEP
@@ -148,7 +169,7 @@ class OSCBridge(threading.Thread):
 
 def draw_staff(surf):
     for i in range(-2, 3):
-        y = STAFF_Y_CENTER + i * LINE_SPACING
+        y = get_staff_line(i)
         pygame.draw.line(surf, STAFF_COLOR,
                          (MARGIN_LEFT, y),
                          (WIDTH - MARGIN_RIGHT, y), 2)
@@ -157,11 +178,18 @@ def draw_staff(surf):
 def draw_clef(surf, clef, font):
     symbol = CLEF_SYMBOLS[clef]
 
-    # IMPORTANT: Bravura needs vertical offset tuning
-    x = MARGIN_LEFT - 50
-    y = STAFF_Y_CENTER - 60
-
     txt = font.render(symbol, True, STAFF_COLOR)
+    rect = txt.get_rect()
+
+    # horizontal placement
+    x = MARGIN_LEFT - 60
+
+    # vertical alignment (musical)
+    anchor_line = CLEF_ANCHOR_LINE[clef]
+    anchor_y = get_staff_line(anchor_line)
+
+    y = anchor_y - rect.height * 0.5 + CLEF_Y_OFFSET[clef]
+
     surf.blit(txt, (x, y))
 
 
@@ -174,7 +202,7 @@ def main():
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock()
 
-    # 🔥 LOAD BRAVURA
+    # LOAD BRAVURA
     font_clef = pygame.font.Font("Bravura.otf", 64)
 
     spawner = Spawner()
