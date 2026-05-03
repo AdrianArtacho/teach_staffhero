@@ -99,12 +99,4 @@ If you’d like a **Jitter (jit.lcd/jit.gl)** version inside Max so you can keep
 
 ---
 
-## To-Do
-
-* Clefs
-* Add second staff (piano view)
-* something needs to happen visually when the user plyed the right next note
-* NowLine displayed
-* option to hear the notes (in browser or so)
-* keep the score of the game visible
-* implement point system (negative points also)
+## [To-Do](https://trello.com/c/1duG7BjH/64-%F0%9F%95%B9-staffwars)
