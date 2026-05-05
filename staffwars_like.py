@@ -33,7 +33,6 @@ CLEF_ANCHOR_LINE = {
     CLEF_TENOR:   0,
 }
 
-# manual offsets (tweak once)
 CLEF_OFFSET = {
     CLEF_TREBLE: (30, -188),
     CLEF_BASS:   (-5, -20),
@@ -53,8 +52,18 @@ NOTE_COLOR = (20, 20, 20)
 
 NOWLINE_COLOR = (200, 60, 60)
 
+PLAYER_COLORS = {
+    "red": (220, 60, 60),
+    "green": (60, 200, 80),
+    "blue": (60, 120, 220),
+    "yellow": (220, 200, 60),
+}
+
+# active player notes
+player_notes = {}
+
 # ========================
-# GLOBALS (will be set dynamically)
+# GLOBALS
 # ========================
 
 WIDTH = 1200
@@ -122,7 +131,6 @@ class Note:
                                  (self.x + 16, pos), 2)
                 pos -= LINE_SPACING
 
-        # notehead
         rect = Rect(self.x - self.rx, self.y - self.ry,
                     self.rx*2, self.ry*2)
         pygame.draw.ellipse(surf, NOTE_COLOR, rect)
@@ -183,11 +191,28 @@ class OSCBridge(threading.Thread):
         except Exception as e:
             print("OSC speed error:", e)
 
+    def _player(self, addr, *args):
+        try:
+            color = str(args[0]).lower()
+            midi = int(args[1])
+            vel = int(args[2]) if len(args) > 2 else 0
+
+            key = (color, midi)
+
+            if vel > 0:
+                player_notes[key] = True
+            else:
+                player_notes.pop(key, None)
+
+        except Exception as e:
+            print("OSC player error:", e)
+
     def run(self):
         disp = dispatcher.Dispatcher()
         disp.map("/note", self._note)
         disp.map("/clef", self._clef)
         disp.map("/speed", self._speed)
+        disp.map("/player", self._player)
 
         server = osc_server.ThreadingOSCUDPServer(("127.0.0.1", 57120), disp)
         print("OSC ready")
@@ -218,6 +243,21 @@ def draw_nowline(surf):
                      (NOWLINE_X, 0),
                      (NOWLINE_X, HEIGHT), 3)
 
+def draw_player_notes(surf, clef):
+    for (color_name, midi) in player_notes.keys():
+        color = PLAYER_COLORS.get(color_name, (255, 0, 0))
+        y = midi_to_staff_y(midi, clef)
+
+        radius = int(LINE_SPACING * 1.2)
+
+        pygame.draw.circle(
+            surf,
+            color,
+            (int(NOWLINE_X), int(y)),
+            radius,
+            3
+        )
+
 # ========================
 # MAIN
 # ========================
@@ -233,7 +273,6 @@ def main():
     screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN)
     pygame.mouse.set_visible(False)
 
-    # responsive layout
     STAFF_Y_CENTER = HEIGHT // 2
     LINE_SPACING = int(HEIGHT * 0.02)
     NOWLINE_X = int(WIDTH * 0.25)
@@ -268,6 +307,7 @@ def main():
         draw_staff(screen)
         draw_nowline(screen)
         draw_clef(screen, spawner.clef, font_clef)
+        draw_player_notes(screen, spawner.clef)
         spawner.draw(screen)
 
         pygame.display.flip()
