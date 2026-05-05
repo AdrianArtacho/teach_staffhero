@@ -107,3 +107,6 @@ If you’d like a **Jitter (jit.lcd/jit.gl)** version inside Max so you can keep
 ## Logs
 
 <logs>
+
+- 2026-05-05: [SNAP_2026-05-05_StaffHero.zip](https://drive.google.com/drive/folders/1Q7BcmFBfPEIpm82cShTVhhbKj8Rxzetv)
+
