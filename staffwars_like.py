@@ -87,6 +87,39 @@ class Note:
             self.dead = True
 
     def draw(self, surf):
+        # === LEDGER LINES ===
+
+        top_line = get_staff_line(-2)
+        bottom_line = get_staff_line(+2)
+
+        ledger_y_positions = []
+
+        # below staff
+        if self.y > bottom_line:
+            pos = bottom_line + LINE_SPACING
+            while self.y > pos - LINE_SPACING / 2:
+                ledger_y_positions.append(pos)
+                pos += LINE_SPACING
+
+        # above staff
+        elif self.y < top_line:
+            pos = top_line - LINE_SPACING
+            while self.y < pos + LINE_SPACING / 2:
+                ledger_y_positions.append(pos)
+                pos -= LINE_SPACING
+
+        # draw ledger lines
+        for ly in ledger_y_positions:
+            pygame.draw.line(
+                surf,
+                STAFF_COLOR,
+                (self.x - 14, ly),
+                (self.x + 14, ly),
+                2
+            )
+
+        # === NOTEHEAD ===
+
         rect = Rect(int(self.x - self.rx), int(self.y - self.ry),
                     int(self.rx*2), int(self.ry*2))
         pygame.draw.ellipse(surf, NOTE_COLOR, rect)
