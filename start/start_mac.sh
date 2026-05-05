@@ -3,7 +3,7 @@
 echo "🎓 Starting workspace…"
 
 ### BEGIN BACKUP ###
-PROJECT_ROOT="/Users/adrian/Documents/PROJECTS/PRISM/Ressources/StaffHero"
+PROJECT_ROOT="/Users/adrian/Documents/PROJECTS/PRISM/Ressources/🕹StaffHero"
 ABLETON_SET="$PROJECT_ROOT/live/StaffHero Project/StaffHero.als"
 ### BEGIN BACKUP ###
 
