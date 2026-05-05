@@ -141,16 +141,18 @@ class Note:
 
         # 🎯 ACCIDENTALS
         if is_black_key(self.midi):
-
             if self.velocity % 2 == 0:
-                accidental = "\uE260"  # flat (Bravura / SMuFL)
+                accidental = "\uE260"  # flat
             else:
-                accidental = "\uE262"  # sharp (Bravura / SMuFL)
+                accidental = "\uE262"  # sharp
 
-            font = pygame.font.Font("Bravura.otf", int(LINE_SPACING * 2))
-            txt = font.render(accidental, True, NOTE_COLOR)
+            accidental_font = pygame.font.Font("Bravura.otf", int(LINE_SPACING * 2.0))
+            txt = accidental_font.render(accidental, True, NOTE_COLOR)
 
-            surf.blit(txt, (self.x - self.rx - int(LINE_SPACING * 1.5), self.y - self.ry))
+            acc_x = self.x - self.rx - int(LINE_SPACING * 1.15)
+            acc_y = self.y - int(LINE_SPACING * 1.85)
+
+            surf.blit(txt, (acc_x, acc_y))
 
 # ========================
 # SPAWNER
