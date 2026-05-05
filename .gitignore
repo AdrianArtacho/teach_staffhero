@@ -50,3 +50,32 @@ Thumbs.db
 
 # Structure
 .venv
+
+# >>> Ableton Live ignores for live/ >>>
+# Only ignore within live/ (your Ableton Live project area)
+
+# --- macOS / Finder junk (scoped to live/) ---
+live/**/.DS_Store
+live/**/.AppleDouble
+live/**/.LSOverride
+
+# Finder custom folder icon file: literally "Icon" + carriage return
+# The glob "Icon?" matches Icon + one extra char (e.g. carriage return).
+live/**/Icon?
+
+# --- Ableton bulky folders (scoped to live/) ---
+live/**/Samples/
+live/**/Recorded/
+live/**/Processed/
+live/**/Freeze/
+live/**/Backup/
+
+# Ableton/DAW analysis sidecars
+live/**/*.asd
+live/**/*.peak
+
+# If you want "ignore everything in live except .als", uncomment:
+# live/**
+# !live/**/
+# !live/**/*.als
+# <<< Ableton Live <<<
