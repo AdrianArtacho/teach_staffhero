@@ -50,6 +50,10 @@ NOTE_COLOR = (20, 20, 20)
 START_SPEED = 180
 SEMITONE_TO_STAFF_STEP = 7/12
 
+NOWLINE_X = int(WIDTH * 0.25)
+NOWLINE_COLOR = (200, 60, 60)
+NOWLINE_WIDTH = 3
+
 # ========================
 # STAFF GEOMETRY
 # ========================
@@ -64,6 +68,15 @@ def midi_to_staff_y(midi, clef):
     semis = midi - ref_midi
     steps = semis * SEMITONE_TO_STAFF_STEP
     return ref_y - steps * (LINE_SPACING / 2.0)
+
+def draw_nowline(surf):
+    pygame.draw.line(
+        surf,
+        NOWLINE_COLOR,
+        (NOWLINE_X, 0),
+        (NOWLINE_X, HEIGHT),
+        NOWLINE_WIDTH
+    )
 
 # ========================
 # NOTE
@@ -264,6 +277,7 @@ def main():
         screen.fill(BG_COLOR)
 
         draw_staff(screen)
+        draw_nowline(screen)
         draw_clef(screen, spawner.clef, font_clef)
         spawner.draw(screen)
 
