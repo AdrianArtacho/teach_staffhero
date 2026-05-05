@@ -61,11 +61,11 @@ GITHUB_REPO="$GITHUB_ROOT/staffhero"
 # Local server
 # ==============================
 
-echo "🌐 Starting local server on port 8000…"
-cd "$PROJECT_ROOT" || exit
-python3 -m http.server 8000 &
-sleep 2
-open "http://localhost:8000"
+# echo "🌐 Starting local server on port 8000…"
+# cd "$PROJECT_ROOT" || exit
+# python3 -m http.server 8000 &
+# sleep 2
+# open "http://localhost:8000"
 
 # ==============================
 # SourceTree
@@ -75,3 +75,17 @@ open -a SourceTree "$PROJECT_ROOT"
 sleep 2
 
 echo "✅ Workspace ready."
+
+# ==============================
+# Start StaffHero game
+# ==============================
+
+echo "🎮 Starting StaffHero..."
+
+cd "$PROJECT_ROOT" || exit
+
+# activate virtual environment
+source .venv/bin/activate
+
+# run the game
+python staffwars_like.py &
