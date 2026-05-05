@@ -181,10 +181,19 @@ class OSCBridge(threading.Thread):
         disp = dispatcher.Dispatcher()
         disp.map("/note", self._note)
         disp.map("/clef", self._clef)
+        disp.map("/speed", self._speed)
 
         server = osc_server.ThreadingOSCUDPServer(("127.0.0.1", 57120), disp)
         print("OSC ready")
         server.serve_forever()
+
+    def _speed(self, addr, *args):
+        try:
+            val = float(args[0])
+            self.spawner.speed = max(10, min(val, 1000))  # clamp for sanity
+            print("Speed set to:", self.spawner.speed)
+        except Exception as e:
+            print("OSC speed error:", e)
 
 # ========================
 # DRAW
