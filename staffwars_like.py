@@ -130,8 +130,13 @@ class OSCBridge(threading.Thread):
         super().__init__(daemon=True)
         self.spawner = spawner
 
-    def _note(self, addr, midi):
-        self.spawner.spawn(int(midi))
+    def _note(self, addr, *args):
+        try:
+            midi = int(args[0])
+            vel = int(args[1]) if len(args) > 1 else 100
+            self.spawner.spawn(midi)
+        except Exception as e:
+            print("OSC note error:", e)
 
     def _clef(self, addr, name):
         name = str(name).lower()
