@@ -34,6 +34,13 @@ CLEF_ANCHOR_LINE = {
     CLEF_TENOR:   0,
 }
 
+CLEF_OFFSET = {
+    CLEF_TREBLE: (33, -133),  # (dx, dy)
+    CLEF_BASS:   (-8, -20),
+    CLEF_ALTO:   (-8, -25),
+    CLEF_TENOR:  (-8, -25),
+}
+
 # ========================
 
 WIDTH, HEIGHT = 1200, 360
@@ -53,6 +60,8 @@ SEMITONE_TO_STAFF_STEP = 7/12
 NOWLINE_X = int(WIDTH * 0.25)
 NOWLINE_COLOR = (200, 60, 60)
 NOWLINE_WIDTH = 3
+
+
 
 # ========================
 # STAFF GEOMETRY
@@ -225,24 +234,14 @@ def draw_clef(surf, clef, font):
     txt = font.render(symbol, True, STAFF_COLOR)
     rect = txt.get_rect()
 
-    x = MARGIN_LEFT - 55
-
-    # Musical anchor line
+    # base position (aligned to staff system)
+    x = MARGIN_LEFT - 50
     anchor_y = get_staff_line(CLEF_ANCHOR_LINE[clef])
 
-    # 🎯 CRITICAL FIX: Bravura offset per clef
-    if clef == CLEF_TREBLE:
-        y = anchor_y - rect.height * 0.72
-    elif clef == CLEF_BASS:
-        y = anchor_y - rect.height * 0.60
-    elif clef == CLEF_ALTO:
-        y = anchor_y - rect.height * 0.66
-    elif clef == CLEF_TENOR:
-        y = anchor_y - rect.height * 0.66
-    else:
-        y = anchor_y - rect.height * 0.5
+    # apply manual offset
+    dx, dy = CLEF_OFFSET[clef]
 
-    surf.blit(txt, (x, y))
+    surf.blit(txt, (x + dx, anchor_y + dy))
 
 # ========================
 # MAIN
