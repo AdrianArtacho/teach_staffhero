@@ -52,7 +52,6 @@ NOTE_COLOR = (20, 20, 20)
 
 NOWLINE_COLOR = (200, 60, 60)
 
-# 🎯 4 players
 PLAYER_COLORS = {
     "red": (220, 60, 60),
     "green": (60, 200, 80),
@@ -60,7 +59,6 @@ PLAYER_COLORS = {
     "gray": (140, 140, 140),
 }
 
-# active player notes
 player_notes = {}
 
 # ========================
@@ -90,13 +88,17 @@ def midi_to_staff_y(midi, clef):
     steps = semis * SEMITONE_TO_STAFF_STEP
     return ref_y - steps * (LINE_SPACING / 2.0)
 
+def is_black_key(midi):
+    return midi % 12 in [1, 3, 6, 8, 10]
+
 # ========================
 # NOTE
 # ========================
 
 class Note:
-    def __init__(self, midi, x, speed, clef):
+    def __init__(self, midi, velocity, x, speed, clef):
         self.midi = midi
+        self.velocity = velocity
         self.x = x
         self.speed = speed
         self.clef = clef
@@ -132,9 +134,23 @@ class Note:
                                  (self.x + 16, pos), 2)
                 pos -= LINE_SPACING
 
+        # notehead
         rect = Rect(self.x - self.rx, self.y - self.ry,
                     self.rx*2, self.ry*2)
         pygame.draw.ellipse(surf, NOTE_COLOR, rect)
+
+        # 🎯 ACCIDENTALS
+        if is_black_key(self.midi):
+
+            if self.velocity % 2 == 0:
+                accidental = "\uE260"  # flat (Bravura / SMuFL)
+            else:
+                accidental = "\uE262"  # sharp (Bravura / SMuFL)
+
+            font = pygame.font.Font("Bravura.otf", int(LINE_SPACING * 2))
+            txt = font.render(accidental, True, NOTE_COLOR)
+
+            surf.blit(txt, (self.x - self.rx - int(LINE_SPACING * 1.5), self.y - self.ry))
 
 # ========================
 # SPAWNER
@@ -148,9 +164,11 @@ class Spawner:
         self.spawn_x = WIDTH - MARGIN_RIGHT
         self.clef = CLEF_TREBLE
 
-    def spawn(self, midi):
+    def spawn(self, midi, velocity):
         with self.lock:
-            self.notes.append(Note(midi, self.spawn_x, self.speed, self.clef))
+            self.notes.append(
+                Note(midi, velocity, self.spawn_x, self.speed, self.clef)
+            )
 
     def update(self, dt):
         with self.lock:
@@ -176,7 +194,8 @@ class OSCBridge(threading.Thread):
     def _note(self, addr, *args):
         try:
             midi = int(args[0])
-            self.spawner.spawn(midi)
+            vel = int(args[1]) if len(args) > 1 else 100
+            self.spawner.spawn(midi, vel)
         except Exception as e:
             print("OSC note error:", e)
 
@@ -199,10 +218,8 @@ class OSCBridge(threading.Thread):
             vel = int(args[2]) if len(args) > 2 else 0
 
             if vel > 0:
-                # add note
                 player_notes[(color, midi)] = True
             else:
-                # 🔥 CLEAR ALL NOTES OF THIS PLAYER
                 to_delete = [k for k in player_notes if k[0] == color]
                 for k in to_delete:
                     del player_notes[k]
@@ -251,7 +268,6 @@ def draw_player_notes(surf, clef):
         color = PLAYER_COLORS.get(color_name, (255, 0, 0))
         y = midi_to_staff_y(midi, clef)
 
-        # 🎯 slightly smaller → matches noteheads better
         radius = int(LINE_SPACING * 0.9)
 
         pygame.draw.circle(
