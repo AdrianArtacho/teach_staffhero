@@ -35,7 +35,7 @@ CLEF_ANCHOR_LINE = {
 
 # manual offsets (tweak once)
 CLEF_OFFSET = {
-    CLEF_TREBLE: (30, -120),
+    CLEF_TREBLE: (30, -188),
     CLEF_BASS:   (-5, -20),
     CLEF_ALTO:   (-5, -25),
     CLEF_TENOR:  (-5, -25),
