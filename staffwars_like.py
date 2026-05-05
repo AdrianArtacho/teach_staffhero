@@ -52,11 +52,12 @@ NOTE_COLOR = (20, 20, 20)
 
 NOWLINE_COLOR = (200, 60, 60)
 
+# 🎯 4 players
 PLAYER_COLORS = {
     "red": (220, 60, 60),
     "green": (60, 200, 80),
     "blue": (60, 120, 220),
-    "yellow": (220, 200, 60),
+    "gray": (140, 140, 140),
 }
 
 # active player notes
@@ -248,7 +249,8 @@ def draw_player_notes(surf, clef):
         color = PLAYER_COLORS.get(color_name, (255, 0, 0))
         y = midi_to_staff_y(midi, clef)
 
-        radius = int(LINE_SPACING * 1.2)
+        # 🎯 slightly smaller → matches noteheads better
+        radius = int(LINE_SPACING * 0.9)
 
         pygame.draw.circle(
             surf,
