@@ -97,6 +97,13 @@ To schedule a note for later:
 
 If you’d like a **Jitter (jit.lcd/jit.gl)** version inside Max so you can keep everything in one patcher, say the word—I can drop a working `[jsui]`/`jit.mgraphics` or `jit.gl.sketch` patch that takes the same OSC messages.
 
+
 ---
 
-## [To-Do](https://trello.com/c/1duG7BjH/64-%F0%9F%95%B9-staffwars)
+## 📝 [To-Do](https://trello.com/c/1duG7BjH/64-%F0%9F%95%B9-staffwars)
+
+## 📁 [GDrive](https://drive.google.com/drive/folders/1Q7BcmFBfPEIpm82cShTVhhbKj8Rxzetv)
+
+## Logs
+
+<logs>
