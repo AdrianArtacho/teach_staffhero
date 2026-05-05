@@ -22,8 +22,8 @@ GITHUB_REPO="$GITHUB_ROOT/staffhero"
 # Launch applications
 # ==============================
 
-# open "$ABLETON_SET"
-# sleep 2
+open "$ABLETON_SET"
+sleep 2
 
 # open "$SIBELIUS_SCORE"
 # sleep 2
