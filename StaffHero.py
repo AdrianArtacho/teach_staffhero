@@ -41,6 +41,15 @@ CLEF_OFFSET = {
 }
 
 # ========================
+# GLOBAL VISUAL OFFSETS
+# ========================
+
+CLEF_Y_OFFSET_GLOBAL = 0
+
+ACCIDENTAL_Y_OFFSET = 0
+ACCIDENTAL_X_OFFSET = 0
+
+# ========================
 
 FPS = 60
 START_SPEED = 180
@@ -86,6 +95,7 @@ def midi_to_staff_y(midi, clef):
 
     semis = midi - ref_midi
     steps = semis * SEMITONE_TO_STAFF_STEP
+
     return ref_y - steps * (LINE_SPACING / 2.0)
 
 def is_black_key(midi):
@@ -110,47 +120,98 @@ class Note:
 
     def update(self, dt):
         self.x -= self.speed * dt
+
         if self.x < -60:
             self.dead = True
 
     def draw(self, surf):
+
         top = get_staff_line(-2)
         bottom = get_staff_line(+2)
 
-        # ledger lines
+        # ========================
+        # LEDGER LINES
+        # ========================
+
         if self.y > bottom:
+
             pos = bottom + LINE_SPACING
-            while self.y > pos - LINE_SPACING/2:
-                pygame.draw.line(surf, STAFF_COLOR,
-                                 (self.x - 16, pos),
-                                 (self.x + 16, pos), 2)
+
+            while self.y > pos - LINE_SPACING / 2:
+
+                pygame.draw.line(
+                    surf,
+                    STAFF_COLOR,
+                    (self.x - 16, pos),
+                    (self.x + 16, pos),
+                    2
+                )
+
                 pos += LINE_SPACING
 
         elif self.y < top:
+
             pos = top - LINE_SPACING
-            while self.y < pos + LINE_SPACING/2:
-                pygame.draw.line(surf, STAFF_COLOR,
-                                 (self.x - 16, pos),
-                                 (self.x + 16, pos), 2)
+
+            while self.y < pos + LINE_SPACING / 2:
+
+                pygame.draw.line(
+                    surf,
+                    STAFF_COLOR,
+                    (self.x - 16, pos),
+                    (self.x + 16, pos),
+                    2
+                )
+
                 pos -= LINE_SPACING
 
-        # notehead
-        rect = Rect(self.x - self.rx, self.y - self.ry,
-                    self.rx*2, self.ry*2)
+        # ========================
+        # NOTEHEAD
+        # ========================
+
+        rect = Rect(
+            self.x - self.rx,
+            self.y - self.ry,
+            self.rx * 2,
+            self.ry * 2
+        )
+
         pygame.draw.ellipse(surf, NOTE_COLOR, rect)
 
-        # 🎯 ACCIDENTALS
+        # ========================
+        # ACCIDENTALS
+        # ========================
+
         if is_black_key(self.midi):
+
             if self.velocity % 2 == 0:
                 accidental = "\uE260"  # flat
             else:
                 accidental = "\uE262"  # sharp
 
-            accidental_font = pygame.font.Font("Bravura.otf", int(LINE_SPACING * 2.0))
-            txt = accidental_font.render(accidental, True, NOTE_COLOR)
+            accidental_font = pygame.font.Font(
+                "Bravura.otf",
+                int(LINE_SPACING * 2.0)
+            )
 
-            acc_x = self.x - self.rx - int(LINE_SPACING * 1.15)
-            acc_y = self.y - int(LINE_SPACING * 1.85)
+            txt = accidental_font.render(
+                accidental,
+                True,
+                NOTE_COLOR
+            )
+
+            acc_x = (
+                self.x
+                - self.rx
+                - int(LINE_SPACING * 1.15)
+                + ACCIDENTAL_X_OFFSET
+            )
+
+            acc_y = (
+                self.y
+                - int(LINE_SPACING * 1.85)
+                + ACCIDENTAL_Y_OFFSET
+            )
 
             surf.blit(txt, (acc_x, acc_y))
 
@@ -160,27 +221,47 @@ class Note:
 
 class Spawner:
     def __init__(self):
+
         self.notes = []
         self.lock = threading.Lock()
+
         self.speed = START_SPEED
         self.spawn_x = WIDTH - MARGIN_RIGHT
+
         self.clef = CLEF_TREBLE
 
     def spawn(self, midi, velocity):
+
         with self.lock:
+
             self.notes.append(
-                Note(midi, velocity, self.spawn_x, self.speed, self.clef)
+                Note(
+                    midi,
+                    velocity,
+                    self.spawn_x,
+                    self.speed,
+                    self.clef
+                )
             )
 
     def update(self, dt):
+
         with self.lock:
+
             for n in self.notes:
+
                 n.speed = self.speed
                 n.update(dt)
-            self.notes = [n for n in self.notes if not n.dead]
+
+            self.notes = [
+                n for n in self.notes
+                if not n.dead
+            ]
 
     def draw(self, surf):
+
         with self.lock:
+
             for n in self.notes:
                 n.draw(surf)
 
@@ -189,55 +270,157 @@ class Spawner:
 # ========================
 
 class OSCBridge(threading.Thread):
+
     def __init__(self, spawner):
+
         super().__init__(daemon=True)
         self.spawner = spawner
 
+    # ========================
+
     def _note(self, addr, *args):
+
         try:
+
             midi = int(args[0])
             vel = int(args[1]) if len(args) > 1 else 100
+
             self.spawner.spawn(midi, vel)
+
         except Exception as e:
             print("OSC note error:", e)
 
+    # ========================
+
     def _clef(self, addr, name):
+
         name = str(name).lower()
+
         if name in CLEF_REFERENCE:
             self.spawner.clef = name
 
+    # ========================
+
     def _speed(self, addr, *args):
+
         try:
+
             val = float(args[0])
-            self.spawner.speed = max(10, min(val, 1000))
+
+            self.spawner.speed = max(
+                10,
+                min(val, 1000)
+            )
+
         except Exception as e:
             print("OSC speed error:", e)
 
-    def _player(self, addr, *args):
+    # ========================
+    # VISUAL OFFSETS
+    # ========================
+
+    def _clef_y_offset(self, addr, *args):
+
+        global CLEF_Y_OFFSET_GLOBAL
+
         try:
+
+            CLEF_Y_OFFSET_GLOBAL = int(args[0])
+
+            print(
+                "CLEF_Y_OFFSET_GLOBAL =",
+                CLEF_Y_OFFSET_GLOBAL
+            )
+
+        except Exception as e:
+            print("OSC clef y offset error:", e)
+
+    def _acc_y_offset(self, addr, *args):
+
+        global ACCIDENTAL_Y_OFFSET
+
+        try:
+
+            ACCIDENTAL_Y_OFFSET = int(args[0])
+
+            print(
+                "ACCIDENTAL_Y_OFFSET =",
+                ACCIDENTAL_Y_OFFSET
+            )
+
+        except Exception as e:
+            print("OSC accidental y offset error:", e)
+
+    def _acc_x_offset(self, addr, *args):
+
+        global ACCIDENTAL_X_OFFSET
+
+        try:
+
+            ACCIDENTAL_X_OFFSET = int(args[0])
+
+            print(
+                "ACCIDENTAL_X_OFFSET =",
+                ACCIDENTAL_X_OFFSET
+            )
+
+        except Exception as e:
+            print("OSC accidental x offset error:", e)
+
+    # ========================
+
+    def _player(self, addr, *args):
+
+        try:
+
             color = str(args[0]).lower()
             midi = int(args[1])
+
             vel = int(args[2]) if len(args) > 2 else 0
 
             if vel > 0:
+
                 player_notes[(color, midi)] = True
+
             else:
-                to_delete = [k for k in player_notes if k[0] == color]
+
+                to_delete = [
+                    k for k in player_notes
+                    if k[0] == color
+                ]
+
                 for k in to_delete:
                     del player_notes[k]
 
         except Exception as e:
             print("OSC player error:", e)
 
+    # ========================
+
     def run(self):
+
         disp = dispatcher.Dispatcher()
+
         disp.map("/note", self._note)
         disp.map("/clef", self._clef)
         disp.map("/speed", self._speed)
+
         disp.map("/player", self._player)
 
-        server = osc_server.ThreadingOSCUDPServer(("127.0.0.1", 57120), disp)
+        # visual calibration
+
+        disp.map("/clefYOffset", self._clef_y_offset)
+
+        disp.map("/accYOffset", self._acc_y_offset)
+        disp.map("/accXOffset", self._acc_x_offset)
+
+        server = osc_server.ThreadingOSCUDPServer(
+            ("127.0.0.1", 57120),
+            disp
+        )
+
         print("OSC ready")
+
         server.serve_forever()
 
 # ========================
@@ -245,29 +428,62 @@ class OSCBridge(threading.Thread):
 # ========================
 
 def draw_staff(surf):
+
     for i in range(-2, 3):
+
         y = get_staff_line(i)
-        pygame.draw.line(surf, STAFF_COLOR,
-                         (MARGIN_LEFT, y),
-                         (WIDTH - MARGIN_RIGHT, y), 2)
+
+        pygame.draw.line(
+            surf,
+            STAFF_COLOR,
+            (MARGIN_LEFT, y),
+            (WIDTH - MARGIN_RIGHT, y),
+            2
+        )
 
 def draw_clef(surf, clef, font):
-    symbol = CLEF_SYMBOLS[clef]
-    txt = font.render(symbol, True, STAFF_COLOR)
 
-    anchor_y = get_staff_line(CLEF_ANCHOR_LINE[clef])
+    symbol = CLEF_SYMBOLS[clef]
+
+    txt = font.render(
+        symbol,
+        True,
+        STAFF_COLOR
+    )
+
+    anchor_y = get_staff_line(
+        CLEF_ANCHOR_LINE[clef]
+    )
+
     dx, dy = CLEF_OFFSET[clef]
 
-    surf.blit(txt, (MARGIN_LEFT - 50 + dx, anchor_y + dy))
+    surf.blit(
+        txt,
+        (
+            MARGIN_LEFT - 50 + dx,
+            anchor_y + dy + CLEF_Y_OFFSET_GLOBAL
+        )
+    )
 
 def draw_nowline(surf):
-    pygame.draw.line(surf, NOWLINE_COLOR,
-                     (NOWLINE_X, 0),
-                     (NOWLINE_X, HEIGHT), 3)
+
+    pygame.draw.line(
+        surf,
+        NOWLINE_COLOR,
+        (NOWLINE_X, 0),
+        (NOWLINE_X, HEIGHT),
+        3
+    )
 
 def draw_player_notes(surf, clef):
+
     for (color_name, midi) in player_notes.keys():
-        color = PLAYER_COLORS.get(color_name, (255, 0, 0))
+
+        color = PLAYER_COLORS.get(
+            color_name,
+            (255, 0, 0)
+        )
+
         y = midi_to_staff_y(midi, clef)
 
         radius = int(LINE_SPACING * 0.9)
@@ -285,40 +501,64 @@ def draw_player_notes(surf, clef):
 # ========================
 
 def main():
-    global WIDTH, HEIGHT, STAFF_Y_CENTER, LINE_SPACING, NOWLINE_X
+
+    global WIDTH
+    global HEIGHT
+    global STAFF_Y_CENTER
+    global LINE_SPACING
+    global NOWLINE_X
 
     pygame.init()
 
     info = pygame.display.Info()
-    WIDTH, HEIGHT = info.current_w, info.current_h
 
-    screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN)
+    WIDTH = info.current_w
+    HEIGHT = info.current_h
+
+    screen = pygame.display.set_mode(
+        (WIDTH, HEIGHT),
+        pygame.FULLSCREEN
+    )
+
     pygame.mouse.set_visible(False)
 
     STAFF_Y_CENTER = HEIGHT // 2
+
     LINE_SPACING = int(HEIGHT * 0.02)
+
     NOWLINE_X = int(WIDTH * 0.25)
 
     clock = pygame.time.Clock()
 
     clef_size = int(LINE_SPACING * 6)
-    font_clef = pygame.font.Font("Bravura.otf", clef_size)
+
+    font_clef = pygame.font.Font(
+        "Bravura.otf",
+        clef_size
+    )
 
     spawner = Spawner()
+
     OSCBridge(spawner).start()
 
     last = time.time()
+
     running = True
 
     while running:
+
         now = time.time()
+
         dt = now - last
         last = now
 
         for e in pygame.event.get():
+
             if e.type == pygame.QUIT:
                 running = False
+
             elif e.type == pygame.KEYDOWN:
+
                 if e.key == pygame.K_ESCAPE:
                     running = False
 
@@ -327,12 +567,24 @@ def main():
         screen.fill(BG_COLOR)
 
         draw_staff(screen)
+
         draw_nowline(screen)
-        draw_clef(screen, spawner.clef, font_clef)
-        draw_player_notes(screen, spawner.clef)
+
+        draw_clef(
+            screen,
+            spawner.clef,
+            font_clef
+        )
+
+        draw_player_notes(
+            screen,
+            spawner.clef
+        )
+
         spawner.draw(screen)
 
         pygame.display.flip()
+
         clock.tick(FPS)
 
     pygame.quit()
